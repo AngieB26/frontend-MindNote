@@ -1,24 +1,8 @@
-// Configure la URL de tu backend aquí
-// En desarrollo usa proxy local directo al backend; en producción usa serverless proxy
-const API_BASE_URL = import.meta.env.MODE === 'development' 
-  ? '' // Vite proxy manejará /api
-  : '' // En producción llamamos a /api/proxy en el mismo dominio
-
-export async function healthCheck(): Promise<boolean> {
-  try {
-    const res = await fetch((API_BASE_URL ? `${API_BASE_URL}` : '') + '/health');
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
+const BACKEND_URL = 'https://backend-nextjs-one.vercel.app';
 
 export async function summarizeText(text: string): Promise<string> {
   try {
-    const endpoint = (import.meta.env.MODE === 'development')
-      ? '/api/ai/analyze'
-      : '/api/proxy';
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${BACKEND_URL}/api/ai/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +20,8 @@ export async function summarizeText(text: string): Promise<string> {
     }
 
     const data = await response.json();
-    return data.result || data.summary || '';
+    // Soporta tanto el formato viejo como el nuevo
+    return data.result || data.data?.result || data.summary || '';
   } catch (error) {
     console.error('Error al resumir:', error);
     throw error;
