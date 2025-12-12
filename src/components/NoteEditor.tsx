@@ -3,8 +3,10 @@ import { Note, CATEGORIES, NoteCategory } from "@/types/note";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Save, Sparkles } from "lucide-react";
+import { X, Save, Sparkles, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { summarizeText } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface NoteEditorProps {
   note?: Note | null;
@@ -17,6 +19,8 @@ export function NoteEditor({ note, onSave, onUpdate, onClose }: NoteEditorProps)
   const [title, setTitle] = useState(note?.title || "");
   const [content, setContent] = useState(note?.content || "");
   const [category, setCategory] = useState<string>(note?.category || "ideas");
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (note) {
@@ -33,6 +37,35 @@ export function NoteEditor({ note, onSave, onUpdate, onClose }: NoteEditorProps)
       onSave(title, content, category);
     }
     onClose();
+  };
+
+  const handleSummarize = async () => {
+    if (!content.trim()) {
+      toast({
+        title: "Error",
+        description: "No hay contenido para resumir",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSummarizing(true);
+    try {
+      const summary = await summarizeText(content);
+      setContent(summary);
+      toast({
+        title: "✨ Resumen creado",
+        description: "El contenido ha sido resumido con IA",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo resumir el texto. Verifica que tu backend esté funcionando.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSummarizing(false);
+    }
   };
 
   const filteredCategories = CATEGORIES.filter((c) => c.value !== "all");
@@ -94,14 +127,25 @@ export function NoteEditor({ note, onSave, onUpdate, onClose }: NoteEditorProps)
         </div>
 
         {/* Footer */}
-        <footer className="flex items-center justify-end gap-3 p-4 border-t border-border bg-muted/30">
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
+        <footer className="flex items-center justify-between gap-3 p-4 border-t border-border bg-muted/30">
+          <Button 
+            variant="outline" 
+            onClick={handleSummarize}
+            disabled={isSummarizing || !content.trim()}
+            className="gap-2"
+          >
+            <Wand2 className={cn("w-4 h-4", isSummarizing && "animate-spin")} />
+            {isSummarizing ? "Resumiendo..." : "Resumir con IA"}
           </Button>
-          <Button variant="glow" onClick={handleSave}>
-            <Save className="w-4 h-4" />
-            {note ? "Guardar cambios" : "Crear nota"}
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button variant="glow" onClick={handleSave}>
+              <Save className="w-4 h-4" />
+              {note ? "Guardar cambios" : "Crear nota"}
+            </Button>
+          </div>
         </footer>
       </div>
     </div>
