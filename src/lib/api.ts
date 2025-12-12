@@ -1,6 +1,8 @@
 // Configure la URL de tu backend aquí
-// Si VITE_API_URL no está definido, usamos rutas relativas para aprovechar el proxy de Vite en dev
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// En desarrollo usa proxy local, en producción usa Vercel
+const API_BASE_URL = import.meta.env.MODE === 'development' 
+  ? '' // Usa el proxy de Vite en desarrollo
+  : import.meta.env.VITE_API_URL || 'https://backend-nextjs-one.vercel.app';
 
 export async function healthCheck(): Promise<boolean> {
   try {
