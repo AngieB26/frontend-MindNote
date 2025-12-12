@@ -20,8 +20,21 @@ export async function summarizeText(text: string): Promise<string> {
     }
 
     const data = await response.json();
-    // Soporta tanto el formato viejo como el nuevo
-    return data.result || data.data?.result || data.summary || '';
+    console.log('Respuesta del backend:', data);
+    
+    // Intentar extraer el resultado de diferentes formatos posibles
+    const result = data.result 
+      || data.data?.result 
+      || data.ok?.data?.result
+      || data.summary 
+      || (typeof data === 'string' ? data : '');
+    
+    if (!result) {
+      console.error('No se pudo extraer el resultado. Datos recibidos:', data);
+      throw new Error('El backend no devolvió un resumen válido');
+    }
+    
+    return result;
   } catch (error) {
     console.error('Error al resumir:', error);
     throw error;
