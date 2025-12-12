@@ -2,7 +2,7 @@
 // En desarrollo usa proxy local, en producción usa Vercel
 const API_BASE_URL = import.meta.env.MODE === 'development' 
   ? '' // Usa el proxy de Vite en desarrollo
-  : import.meta.env.VITE_API_URL || 'https://backend-nextjs-7lzl119g1-angiebq26s-projects.vercel.app';
+  : import.meta.env.VITE_API_URL || 'https://backend-nextjs-one.vercel.app';
 
 export async function healthCheck(): Promise<boolean> {
   try {
