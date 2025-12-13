@@ -7,8 +7,10 @@ import { NoteCard } from "@/components/NoteCard";
 import { NoteEditor } from "@/components/NoteEditor";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { signup, getDemoUser } from "@/lib/api";
 
 const Index = () => {
   const { notes, addNote, updateNote, deleteNote, togglePin, filterNotes } = useNotes();
@@ -16,6 +18,10 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
 
   // Filter notes based on category and search
   const filteredNotes = useMemo(
@@ -65,6 +71,37 @@ const Index = () => {
     toast.success(note?.isPinned ? "Nota desanclada" : "Nota anclada");
   };
 
+  const handleSignup = async () => {
+    if (!email || !name || !password) {
+      toast.error("Completa email, nombre y contraseña");
+      return;
+    }
+    setIsAuthLoading(true);
+    try {
+      const user = await signup(email, name, password);
+      localStorage.setItem("userId", user.userId || "");
+      localStorage.setItem("userEmail", user.email || "");
+      toast.success(user.isNew ? "Usuario creado" : "Usuario listo");
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudo crear usuario");
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleDemo = async () => {
+    setIsAuthLoading(true);
+    try {
+      const userId = await getDemoUser();
+      localStorage.setItem("userId", userId || "");
+      toast.success("Usuario demo listo");
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudo obtener usuario demo");
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
   const currentCategory = CATEGORIES.find((c) => c.value === activeCategory);
 
   return (
@@ -94,6 +131,37 @@ const Index = () => {
                 <Plus className="w-5 h-5" />
                 Nueva nota
               </Button>
+            </div>
+
+            {/* Registro / Usuario demo */}
+            <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-3 mb-6 p-4 border border-border rounded-xl bg-card/60">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Input
+                  placeholder="Nombre"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <Input
+                  placeholder="Contraseña"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-wrap gap-3 justify-end items-center">
+                <Button variant="secondary" onClick={handleDemo} disabled={isAuthLoading}>
+                  Usuario demo
+                </Button>
+                <Button variant="glow" onClick={handleSignup} disabled={isAuthLoading}>
+                  {isAuthLoading ? "Procesando..." : "Registrarse"}
+                </Button>
+              </div>
             </div>
 
             {/* Search */}
