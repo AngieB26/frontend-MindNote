@@ -12,24 +12,43 @@ export async function loadCategories() {
     const json = await res.json();
     const categories = json.data || json || [];
     
+    console.log('Backend categories loaded:', categories);
+    
     // Map category names to IDs and IDs to names
     categoryMap = {};
     categoryIdToName = {};
+    
     categories.forEach((cat: any) => {
-      const name = cat.name.toLowerCase();
-      categoryMap[name] = cat.id;
-      categoryIdToName[cat.id] = name;
+      const backendName = cat.name.toLowerCase();
+      const id = cat.id;
       
-      // Also map common variations
-      if (name === 'general') {
-        categoryMap['ideas'] = cat.id;
-        categoryIdToName[cat.id] = 'ideas';
+      // Map backend name directly
+      categoryMap[backendName] = id;
+      
+      // Map to frontend category names
+      if (backendName.includes('idea') || backendName === 'general') {
+        categoryMap['ideas'] = id;
+        categoryIdToName[id] = 'ideas';
+      } else if (backendName.includes('tarea')) {
+        categoryMap['tasks'] = id;
+        categoryIdToName[id] = 'tasks';
+      } else if (backendName.includes('reunion') || backendName.includes('meeting')) {
+        categoryMap['meetings'] = id;
+        categoryIdToName[id] = 'meetings';
+      } else if (backendName.includes('personal')) {
+        categoryMap['personal'] = id;
+        categoryIdToName[id] = 'personal';
+      } else if (backendName.includes('trabajo') || backendName.includes('work')) {
+        categoryMap['work'] = id;
+        categoryIdToName[id] = 'work';
+      } else {
+        // Fallback: use backend name as-is
+        categoryIdToName[id] = backendName;
       }
-      if (name === 'tareas') categoryMap['tasks'] = cat.id;
-      if (name === 'reuniones') categoryMap['meetings'] = cat.id;
-      if (name === 'personal') categoryMap['personal'] = cat.id;
-      if (name === 'trabajo') categoryMap['work'] = cat.id;
     });
+    
+    console.log('Category mapping:', categoryMap);
+    console.log('Category ID to name:', categoryIdToName);
   } catch (e) {
     console.error('Error loading categories:', e);
   }
