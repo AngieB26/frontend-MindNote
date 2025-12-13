@@ -52,11 +52,19 @@ export function NoteEditor({ note, onSave, onUpdate, onClose }: NoteEditorProps)
     setIsSummarizing(true);
     try {
       const summary = await summarizeText(content);
-      setContent(summary);
-      toast({
-        title: "✨ Resumen creado",
-        description: "El contenido ha sido resumido con IA",
-      });
+      if (!summary || !summary.trim()) {
+        toast({
+          title: "Sin resumen",
+          description: "El backend no devolvió contenido resumido",
+          variant: "destructive",
+        });
+      } else {
+        setContent(summary);
+        toast({
+          title: "✨ Resumen creado",
+          description: "El contenido ha sido resumido con IA",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
