@@ -12,24 +12,38 @@ export async function getNotes() {
 }
 
 export async function createNote(title: string, content: string, category: string) {
+  const payload = { title, content, categoryId: category };
+  console.log('Creating note with payload:', payload);
   const res = await fetch(`${BACKEND_URL}/api/notes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, content, category }),
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`Error ${res.status}`);
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    console.error('Create note error:', error);
+    throw new Error(`Error ${res.status}`);
+  }
   const json = await res.json();
+  console.log('Created note response:', json);
   return json.data || json;
 }
 
 export async function updateNote(id: string, title: string, content: string, category: string) {
+  const payload = { title, content, categoryId: category };
+  console.log('Updating note with payload:', payload);
   const res = await fetch(`${BACKEND_URL}/api/notes/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, content, category }),
+    body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`Error ${res.status}`);
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    console.error('Update note error:', error);
+    throw new Error(`Error ${res.status}`);
+  }
   const json = await res.json();
+  console.log('Updated note response:', json);
   return json.data || json;
 }
 
@@ -38,6 +52,8 @@ export async function deleteNote(id: string) {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
   });
+  // Tratar 404 como éxito - la nota ya no existe
+  if (res.status === 404) return true;
   if (!res.ok) throw new Error(`Error ${res.status}`);
   return true;
 }
