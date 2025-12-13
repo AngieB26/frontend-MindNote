@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface NoteEditorProps {
   note?: Note | null;
-  onSave: (title: string, content: string, category: string) => void;
+  onSave: (title: string, content: string, categoryId: string) => void;
   onUpdate?: (id: string, updates: Partial<Note>) => void;
   onClose: () => void;
 }

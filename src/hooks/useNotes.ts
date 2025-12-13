@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Note, NoteCategory } from "@/types/note";
-import { getNotes, createNote, updateNote as updateNoteAPI, deleteNote as deleteNoteAPI, loadCategories } from "@/lib/api";
+import { getNotes, createNote, updateNote as updateNoteAPI, deleteNote as deleteNoteAPI, loadCategories, getCategoryName } from "@/lib/api";
 
 const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
 
@@ -20,6 +20,7 @@ export function useNotes() {
         const notesArray = Array.isArray(data) ? data : [];
         setNotes(notesArray.map((note: any) => ({
           ...note,
+          category: note.categoryId ? getCategoryName(note.categoryId) : 'ideas',
           createdAt: new Date(note.createdAt),
           updatedAt: new Date(note.updatedAt),
         })));
@@ -40,7 +41,7 @@ export function useNotes() {
         id: newNote.id,
         title: newNote.title || "Sin título",
         content: newNote.content,
-        category: newNote.category,
+        category: newNote.categoryId ? getCategoryName(newNote.categoryId) : category,
         createdAt: new Date(newNote.createdAt),
         updatedAt: new Date(newNote.updatedAt),
         isPinned: newNote.isPinned || false,

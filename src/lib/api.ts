@@ -2,6 +2,7 @@ const BACKEND_URL = 'https://backend-nextjs-one.vercel.app';
 
 // Category mapping: frontend category name -> backend category ID
 let categoryMap: Record<string, string> = {};
+let categoryIdToName: Record<string, string> = {};
 
 // Load categories from backend and create mapping
 export async function loadCategories() {
@@ -11,13 +12,19 @@ export async function loadCategories() {
     const json = await res.json();
     const categories = json.data || json || [];
     
-    // Map category names to IDs
+    // Map category names to IDs and IDs to names
     categoryMap = {};
+    categoryIdToName = {};
     categories.forEach((cat: any) => {
       const name = cat.name.toLowerCase();
       categoryMap[name] = cat.id;
+      categoryIdToName[cat.id] = name;
+      
       // Also map common variations
-      if (name === 'general') categoryMap['ideas'] = cat.id;
+      if (name === 'general') {
+        categoryMap['ideas'] = cat.id;
+        categoryIdToName[cat.id] = 'ideas';
+      }
       if (name === 'tareas') categoryMap['tasks'] = cat.id;
       if (name === 'reuniones') categoryMap['meetings'] = cat.id;
       if (name === 'personal') categoryMap['personal'] = cat.id;
@@ -31,6 +38,11 @@ export async function loadCategories() {
 // Get categoryId from category name
 function getCategoryId(category: string): string | undefined {
   return categoryMap[category.toLowerCase()] || categoryMap['general'] || categoryMap['ideas'];
+}
+
+// Get category name from categoryId
+export function getCategoryName(categoryId: string): string {
+  return categoryIdToName[categoryId] || 'ideas';
 }
 
 // Notes API
