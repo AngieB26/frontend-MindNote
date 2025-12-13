@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Note, NoteCategory } from "@/types/note";
-
-const STORAGE_KEY = "mindinote-notes";
+import { getNotes, createNote, updateNote as updateNoteAPI, deleteNote as deleteNoteAPI } from "@/lib/api";
 
 const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
 
@@ -9,66 +8,92 @@ export function useNotes() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load notes from localStorage
+  // Load notes from backend
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    const loadNotes = async () => {
       try {
-        const parsed = JSON.parse(stored);
-        setNotes(parsed.map((note: Note) => ({
+        const data = await getNotes();
+        const notesArray = Array.isArray(data) ? data : [];
+        setNotes(notesArray.map((note: any) => ({
           ...note,
           createdAt: new Date(note.createdAt),
           updatedAt: new Date(note.updatedAt),
         })));
       } catch (e) {
-        console.error("Error parsing notes:", e);
+        console.error("Error loading notes from backend:", e);
+        setNotes([]);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
-  }, []);
-
-  // Save notes to localStorage
-  useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-    }
-  }, [notes, isLoading]);
-
-  const addNote = useCallback((title: string, content: string, category: string = "ideas") => {
-    const newNote: Note = {
-      id: generateId(),
-      title: title || "Sin título",
-      content,
-      category,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      isPinned: false,
     };
-    setNotes((prev) => [newNote, ...prev]);
-    return newNote;
+    loadNotes();
   }, []);
 
-  const updateNote = useCallback((id: string, updates: Partial<Note>) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === id
-          ? { ...note, ...updates, updatedAt: new Date() }
-          : note
-      )
-    );
+  const addNote = useCallback(async (title: string, content: string, category: string = "ideas") => {
+    try {
+      const newNote = await createNote(title || "Sin título", content, category);
+      const note: Note = {
+        id: newNote.id,
+        title: newNote.title || "Sin título",
+        content: newNote.content,
+        category: newNote.category,
+        createdAt: new Date(newNote.createdAt),
+        updatedAt: new Date(newNote.updatedAt),
+        isPinned: newNote.isPinned || false,
+      };
+      setNotes((prev) => [note, ...prev]);
+      return note;
+    } catch (e) {
+      console.error("Error creating note:", e);
+      throw e;
+    }
   }, []);
 
-  const deleteNote = useCallback((id: string) => {
-    setNotes((prev) => prev.filter((note) => note.id !== id));
+  const updateNote = useCallback(async (id: string, updates: Partial<Note>) => {
+    try {
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+      
+      await updateNoteAPI(id, updates.title || note.title, updates.content || note.content, updates.category || note.category);
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === id
+            ? { ...n, ...updates, updatedAt: new Date() }
+            : n
+        )
+      );
+    } catch (e) {
+      console.error("Error updating note:", e);
+      throw e;
+    }
+  }, [notes]);
+
+  const deleteNote = useCallback(async (id: string) => {
+    try {
+      await deleteNoteAPI(id);
+      setNotes((prev) => prev.filter((note) => note.id !== id));
+    } catch (e) {
+      console.error("Error deleting note:", e);
+      throw e;
+    }
   }, []);
 
-  const togglePin = useCallback((id: string) => {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === id ? { ...note, isPinned: !note.isPinned } : note
-      )
-    );
-  }, []);
+  const togglePin = useCallback(async (id: string) => {
+    try {
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+      
+      await updateNoteAPI(id, note.title, note.content, note.category);
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === id ? { ...n, isPinned: !n.isPinned } : n
+        )
+      );
+    } catch (e) {
+      console.error("Error toggling pin:", e);
+      throw e;
+    }
+  }, [notes]);
 
   const filterNotes = useCallback(
     (category: NoteCategory, searchQuery: string) => {

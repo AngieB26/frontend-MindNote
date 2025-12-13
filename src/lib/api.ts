@@ -1,5 +1,47 @@
 const BACKEND_URL = 'https://backend-nextjs-one.vercel.app';
 
+// Notes API
+export async function getNotes() {
+  const res = await fetch(`${BACKEND_URL}/api/notes`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const json = await res.json();
+  return json.data || json || [];
+}
+
+export async function createNote(title: string, content: string, category: string) {
+  const res = await fetch(`${BACKEND_URL}/api/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, content, category }),
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const json = await res.json();
+  return json.data || json;
+}
+
+export async function updateNote(id: string, title: string, content: string, category: string) {
+  const res = await fetch(`${BACKEND_URL}/api/notes/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, content, category }),
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const json = await res.json();
+  return json.data || json;
+}
+
+export async function deleteNote(id: string) {
+  const res = await fetch(`${BACKEND_URL}/api/notes/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return true;
+}
+
 export async function summarizeText(text: string): Promise<string> {
   try {
     const response = await fetch(`${BACKEND_URL}/api/ai/analyze`, {
