@@ -1,8 +1,8 @@
-@const BACKEND_URL = 'https://backend-nextjs-one.vercel.app';
+const BACKEND_URL = 'https://backend-nextjs-one.vercel.app';
 
 export async function summarizeText(text: string): Promise<string> {
   try {
-    const response = await fetch(\\/api/ai/analyze\, {
+    const response = await fetch(`${BACKEND_URL}/api/ai/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15,14 +15,14 @@ export async function summarizeText(text: string): Promise<string> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error || errorData.message || \Error \\;
+      const errorMessage = errorData.error || errorData.message || `Error ${response.status}`;
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
     console.log('Respuesta del backend:', data);
     
-    // Intentar extraer el resumen según la guía del backend
+    // Intentar extraer el resumen segÃºn la guÃ­a del backend
     const result = data.summary
       || data.data?.summary
       || data.data?.result
@@ -31,7 +31,7 @@ export async function summarizeText(text: string): Promise<string> {
     
     if (!result) {
       console.error('No se pudo extraer el resumen. Datos recibidos:', data);
-      throw new Error('El backend no devolvió un resumen válido');
+      throw new Error('El backend no devolviÃ³ un resumen vÃ¡lido');
     }
     
     return result;
