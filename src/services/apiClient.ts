@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://backend-nextjs-one.vercel.app';
+const BACKEND_URL = 'https://backend-mind-note.vercel.app/';
 
 interface MensajeRequest {
   mensaje: string;
