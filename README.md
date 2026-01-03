@@ -5,6 +5,7 @@
 [![Vite](https://img.shields.io/badge/Vite-5.4.19-646cff?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4.17-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Deployed on Lovable](https://img.shields.io/badge/Deployed%20on-Lovable-ff69b4)](https://lovable.dev)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://frontend-mindnote.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 📝 Descripción
@@ -12,6 +13,12 @@
 MindNote es una aplicación web moderna diseñada para ser tu segundo cerebro digital. Captura, organiza y transforma tus ideas con una interfaz intuitiva y rápida. La plataforma perfecta para gestionar notas e información importante de manera eficiente.
 
 Construida con las tecnologías más modernas del ecosistema React, MindNote ofrece una experiencia de usuario fluida y profesional, permitiéndote concentrarte en lo que realmente importa: tus ideas.
+
+## 🌐 Demo Online
+
+¡Pruébalo ahora en Vercel! 👉 [https://frontend-mindnote.vercel.app](https://frontend-mindnote.vercel.app)
+
+Puedes acceder a la versión desplegada para explorar todas las funcionalidades sin necesidad de instalación.
 
 ## ✨ Características
 
